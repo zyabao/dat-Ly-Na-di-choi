@@ -175,3 +175,63 @@ loadData();
 // tự lưu khi thay đổi
 document.addEventListener("change", saveData);
 document.addEventListener("input", saveData);
+<script>
+const BIN_ID = "DÁN_BIN_ID";
+const API_KEY = "DÁN_API_KEY";
+
+// Lưu dữ liệu
+async function saveData() {
+  const rows = [];
+  document.querySelectorAll("#table tbody tr").forEach(row => {
+    rows.push({
+      idea: row.children[0].querySelector("input").value,
+      address: row.children[1].querySelector("input").value,
+      like: row.children[2].querySelector("input").checked,
+      dislike: row.children[3].querySelector("input").checked,
+    });
+  });
+
+  await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Master-Key": API_KEY
+    },
+    body: JSON.stringify(rows)
+  });
+}
+
+// Load dữ liệu
+async function loadData() {
+  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+    headers: {
+      "X-Master-Key": API_KEY
+    }
+  });
+
+  const data = await res.json();
+  const rows = data.record;
+
+  if (!rows) return;
+
+  const tbody = document.querySelector("#table tbody");
+  tbody.innerHTML = "";
+
+  rows.forEach(item => {
+    addRow();
+    const row = document.querySelector("#table tbody tr:last-child");
+
+    row.children[0].querySelector("input").value = item.idea;
+    row.children[1].querySelector("input").value = item.address;
+    row.children[2].querySelector("input").checked = item.like;
+    row.children[3].querySelector("input").checked = item.dislike;
+  });
+
+  updateAll();
+}
+
+// auto load + save
+loadData();
+document.addEventListener("change", saveData);
+document.addEventListener("input", saveData);
+</script>
