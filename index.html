@@ -134,3 +134,44 @@ for (let i = 0; i < 3; i++) addRow();
 
 </body>
 </html>
+function saveData() {
+  const rows = [];
+  document.querySelectorAll("#table tbody tr").forEach(row => {
+    rows.push({
+      idea: row.children[0].querySelector("input").value,
+      address: row.children[1].querySelector("input").value,
+      like: row.children[2].querySelector("input").checked,
+      dislike: row.children[3].querySelector("input").checked,
+      done: row.children[5].innerHTML
+    });
+  });
+
+  localStorage.setItem("data", JSON.stringify(rows));
+}
+
+function loadData() {
+  const data = JSON.parse(localStorage.getItem("data") || "[]");
+
+  if (data.length > 0) {
+    document.querySelector("#table tbody").innerHTML = "";
+    data.forEach(item => {
+      addRow();
+      const row = document.querySelector("#table tbody tr:last-child");
+
+      row.children[0].querySelector("input").value = item.idea;
+      row.children[1].querySelector("input").value = item.address;
+      row.children[2].querySelector("input").checked = item.like;
+      row.children[3].querySelector("input").checked = item.dislike;
+      row.children[5].innerHTML = item.done;
+    });
+
+    updateAll();
+  }
+}
+
+// load khi mở web
+loadData();
+
+// tự lưu khi thay đổi
+document.addEventListener("change", saveData);
+document.addEventListener("input", saveData);
