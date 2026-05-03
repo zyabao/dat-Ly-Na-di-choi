@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Chọn địa điểm đi chơi 💕</title>
+  <style>
+    body {
+      font-family: "Comic Sans MS", cursive;
+      background: #ffeef2;
+      text-align: center;
+    }
+
+    h1 {
+      color: #ff6b81;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: #ffcad4;
+    }
+
+    input[type="text"] {
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 140px;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.3);
+      cursor: pointer;
+    }
+
+    .done {
+      font-weight: bold;
+      color: red;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      border: none;
+      background: #ff6b81;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #ff4757;
+    }
+  </style>
+</head>
+<body>
+
+<h1>💖 Chọn địa điểm đi chơi 💖</h1>
+
+<table id="table">
+  <thead>
+    <tr>
+      <th>Ý tưởng 💡</th>
+      <th>Địa chỉ 📍</th>
+      <th>Em thích 😍</th>
+      <th>Em không thích 😒</th>
+      <th>Ưu tiên</th>
+      <th>Đã hoàn thành</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+
+<button onclick="addRow()">➕ Thêm ý tưởng</button>
+
+<script>
+function addRow() {
+  const table = document.querySelector("#table tbody");
+  const row = document.createElement("tr");
+
+  row.innerHTML = `
+    <td><input type="text" placeholder="Ví dụ: Đi cafe"></td>
+    <td><input type="text" placeholder="Quận 7..."></td>
+    <td><input type="checkbox" onchange="updateAll()"></td>
+    <td><input type="checkbox" onchange="updateAll()"></td>
+    <td class="priority"></td>
+    <td class="done"></td>
+  `;
+
+  table.appendChild(row);
+}
+
+function updateAll() {
+  const rows = document.querySelectorAll("#table tbody tr");
+  let priority = 1;
+
+  rows.forEach(row => {
+    const like = row.children[2].querySelector("input");
+    const dislike = row.children[3].querySelector("input");
+    const priorityCell = row.children[4];
+    const doneCell = row.children[5];
+
+    if (dislike.checked) {
+      like.checked = false;
+      doneCell.innerHTML = "<span style='color:red;font-weight:bold'>X</span>";
+      priorityCell.textContent = "";
+    } 
+    else if (like.checked) {
+      doneCell.innerHTML = "<input type='checkbox'>";
+      priorityCell.textContent = priority++;
+    } 
+    else {
+      doneCell.innerHTML = "";
+      priorityCell.textContent = "";
+    }
+  });
+}
+
+// tạo sẵn 3 dòng
+for (let i = 0; i < 3; i++) addRow();
+</script>
+
+</body>
+</html>
