@@ -5,13 +5,43 @@
 <title>Chọn địa điểm đi chơi 💕</title>
 
 <style>
-body { font-family: "Comic Sans MS"; background:#ffeef2; text-align:center;}
-h1 { color:#ff6b81;}
-table { margin:20px auto; background:white; border-radius:12px;}
-th,td { padding:10px;}
-th { background:#ffcad4;}
-input[type="checkbox"] { transform:scale(1.3);}
-button { margin-top:10px; padding:10px; background:#ff6b81; color:white; border-radius:10px;}
+body {
+  font-family: "Comic Sans MS";
+  background:#ffeef2;
+  text-align:center;
+}
+
+h1 { color:#ff6b81; }
+
+table {
+  margin:20px auto;
+  background:white;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+th,td { padding:10px; }
+th { background:#ffcad4; }
+
+input[type="checkbox"] { transform:scale(1.3); }
+
+button {
+  padding:8px 10px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.add-btn {
+  margin-top:10px;
+  background:#ff6b81;
+  color:white;
+}
+
+.delete-btn {
+  background:#ff4d4d;
+  color:white;
+}
 </style>
 </head>
 
@@ -28,12 +58,13 @@ button { margin-top:10px; padding:10px; background:#ff6b81; color:white; border-
 <th>😒</th>
 <th>Ưu tiên</th>
 <th>Đã hoàn thành</th>
+<th>❌</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<button onclick="addRow()">➕ Thêm</button>
+<button class="add-btn" onclick="addRow()">➕ Thêm ý tưởng</button>
 
 <script>
 const API_URL = "https://sheetdb.io/api/v1/0vnu9lnzuwycf";
@@ -49,9 +80,17 @@ function addRow() {
     <td><input type="checkbox" onchange="updateAll()"></td>
     <td></td>
     <td></td>
+    <td><button class="delete-btn" onclick="deleteRow(this)">❌</button></td>
   `;
 
   document.querySelector("#table tbody").appendChild(row);
+}
+
+// xoá dòng
+function deleteRow(btn) {
+  btn.parentElement.parentElement.remove();
+  updateAll();
+  saveData();
 }
 
 // xử lý logic
@@ -77,11 +116,9 @@ function updateAll() {
       row.children[4].textContent = "";
     }
   });
-
-  saveData();
 }
 
-// lưu dữ liệu lên Google Sheet
+// lưu dữ liệu
 async function saveData(){
   const rows=[];
 
@@ -94,10 +131,8 @@ async function saveData(){
     });
   });
 
-  // xóa hết dữ liệu cũ
   await fetch(API_URL, { method:"DELETE" });
 
-  // ghi lại từng dòng
   for (let r of rows){
     await fetch(API_URL,{
       method:"POST",
@@ -107,7 +142,7 @@ async function saveData(){
   }
 }
 
-// load dữ liệu từ sheet
+// load dữ liệu
 async function loadData(){
   const res = await fetch(API_URL);
   const data = await res.json();
@@ -128,10 +163,8 @@ async function loadData(){
   updateAll();
 }
 
-// chạy khi mở web
+// auto
 loadData();
-
-// tự lưu
 document.addEventListener("change", saveData);
 document.addEventListener("input", saveData);
 </script>
