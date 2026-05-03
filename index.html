@@ -1,237 +1,140 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Chọn địa điểm đi chơi 💕</title>
-  <style>
-    body {
-      font-family: "Comic Sans MS", cursive;
-      background: #ffeef2;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<title>Chọn địa điểm đi chơi 💕</title>
 
-    h1 {
-      color: #ff6b81;
-    }
-
-    table {
-      margin: 20px auto;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
-    }
-
-    th {
-      background: #ffcad4;
-    }
-
-    input[type="text"] {
-      padding: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 140px;
-    }
-
-    input[type="checkbox"] {
-      transform: scale(1.3);
-      cursor: pointer;
-    }
-
-    .done {
-      font-weight: bold;
-      color: red;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 10px 15px;
-      border: none;
-      background: #ff6b81;
-      color: white;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #ff4757;
-    }
-  </style>
+<style>
+body { font-family: "Comic Sans MS"; background:#ffeef2; text-align:center;}
+h1 { color:#ff6b81;}
+table { margin:20px auto; background:white; border-radius:12px;}
+th,td { padding:10px;}
+th { background:#ffcad4;}
+input[type="checkbox"] { transform:scale(1.3);}
+button { margin-top:10px; padding:10px; background:#ff6b81; color:white; border-radius:10px;}
+</style>
 </head>
+
 <body>
 
 <h1>💖 Chọn địa điểm đi chơi 💖</h1>
 
 <table id="table">
-  <thead>
-    <tr>
-      <th>Ý tưởng 💡</th>
-      <th>Địa chỉ 📍</th>
-      <th>Em thích 😍</th>
-      <th>Em không thích 😒</th>
-      <th>Ưu tiên</th>
-      <th>Đã hoàn thành</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
+<thead>
+<tr>
+<th>Ý tưởng 💡</th>
+<th>Địa chỉ 📍</th>
+<th>😍</th>
+<th>😒</th>
+<th>Ưu tiên</th>
+<th>Đã hoàn thành</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 
-<button onclick="addRow()">➕ Thêm ý tưởng</button>
+<button onclick="addRow()">➕ Thêm</button>
 
 <script>
+const API_URL = "https://sheetdb.io/api/v1/0vnu9lnzuwycf";
+
+// thêm dòng
 function addRow() {
-  const table = document.querySelector("#table tbody");
   const row = document.createElement("tr");
 
   row.innerHTML = `
-    <td><input type="text" placeholder="Ví dụ: Đi cafe"></td>
-    <td><input type="text" placeholder="Quận 7..."></td>
+    <td><input></td>
+    <td><input></td>
     <td><input type="checkbox" onchange="updateAll()"></td>
     <td><input type="checkbox" onchange="updateAll()"></td>
-    <td class="priority"></td>
-    <td class="done"></td>
+    <td></td>
+    <td></td>
   `;
 
-  table.appendChild(row);
+  document.querySelector("#table tbody").appendChild(row);
 }
 
+// xử lý logic
 function updateAll() {
-  const rows = document.querySelectorAll("#table tbody tr");
-  let priority = 1;
+  let p = 1;
 
-  rows.forEach(row => {
+  document.querySelectorAll("#table tbody tr").forEach(row=>{
     const like = row.children[2].querySelector("input");
     const dislike = row.children[3].querySelector("input");
-    const priorityCell = row.children[4];
-    const doneCell = row.children[5];
+    const done = row.children[5];
 
-    if (dislike.checked) {
+    if(dislike.checked){
       like.checked = false;
-      doneCell.innerHTML = "<span style='color:red;font-weight:bold'>X</span>";
-      priorityCell.textContent = "";
-    } 
-    else if (like.checked) {
-      doneCell.innerHTML = "<input type='checkbox'>";
-      priorityCell.textContent = priority++;
-    } 
-    else {
-      doneCell.innerHTML = "";
-      priorityCell.textContent = "";
+      done.innerHTML = "❌";
+      row.children[4].textContent = "";
+    }
+    else if(like.checked){
+      done.innerHTML = "<input type='checkbox'>";
+      row.children[4].textContent = p++;
+    }
+    else{
+      done.innerHTML = "";
+      row.children[4].textContent = "";
     }
   });
+
+  saveData();
 }
 
-// tạo sẵn 3 dòng
-for (let i = 0; i < 3; i++) addRow();
-</script>
+// lưu dữ liệu lên Google Sheet
+async function saveData(){
+  const rows=[];
 
-</body>
-</html>
-function saveData() {
-  const rows = [];
-  document.querySelectorAll("#table tbody tr").forEach(row => {
+  document.querySelectorAll("#table tbody tr").forEach(row=>{
     rows.push({
       idea: row.children[0].querySelector("input").value,
       address: row.children[1].querySelector("input").value,
       like: row.children[2].querySelector("input").checked,
-      dislike: row.children[3].querySelector("input").checked,
-      done: row.children[5].innerHTML
+      dislike: row.children[3].querySelector("input").checked
     });
   });
 
-  localStorage.setItem("data", JSON.stringify(rows));
-}
+  // xóa hết dữ liệu cũ
+  await fetch(API_URL, { method:"DELETE" });
 
-function loadData() {
-  const data = JSON.parse(localStorage.getItem("data") || "[]");
-
-  if (data.length > 0) {
-    document.querySelector("#table tbody").innerHTML = "";
-    data.forEach(item => {
-      addRow();
-      const row = document.querySelector("#table tbody tr:last-child");
-
-      row.children[0].querySelector("input").value = item.idea;
-      row.children[1].querySelector("input").value = item.address;
-      row.children[2].querySelector("input").checked = item.like;
-      row.children[3].querySelector("input").checked = item.dislike;
-      row.children[5].innerHTML = item.done;
+  // ghi lại từng dòng
+  for (let r of rows){
+    await fetch(API_URL,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ data: r })
     });
-
-    updateAll();
   }
 }
 
-// load khi mở web
-loadData();
-
-// tự lưu khi thay đổi
-document.addEventListener("change", saveData);
-document.addEventListener("input", saveData);
-<script>
-const BIN_ID = "DÁN_BIN_ID";
-const API_KEY = "DÁN_API_KEY";
-
-// Lưu dữ liệu
-async function saveData() {
-  const rows = [];
-  document.querySelectorAll("#table tbody tr").forEach(row => {
-    rows.push({
-      idea: row.children[0].querySelector("input").value,
-      address: row.children[1].querySelector("input").value,
-      like: row.children[2].querySelector("input").checked,
-      dislike: row.children[3].querySelector("input").checked,
-    });
-  });
-
-  await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Master-Key": API_KEY
-    },
-    body: JSON.stringify(rows)
-  });
-}
-
-// Load dữ liệu
-async function loadData() {
-  const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-    headers: {
-      "X-Master-Key": API_KEY
-    }
-  });
-
+// load dữ liệu từ sheet
+async function loadData(){
+  const res = await fetch(API_URL);
   const data = await res.json();
-  const rows = data.record;
-
-  if (!rows) return;
 
   const tbody = document.querySelector("#table tbody");
-  tbody.innerHTML = "";
+  tbody.innerHTML="";
 
-  rows.forEach(item => {
+  data.forEach(item=>{
     addRow();
     const row = document.querySelector("#table tbody tr:last-child");
 
     row.children[0].querySelector("input").value = item.idea;
     row.children[1].querySelector("input").value = item.address;
-    row.children[2].querySelector("input").checked = item.like;
-    row.children[3].querySelector("input").checked = item.dislike;
+    row.children[2].querySelector("input").checked = item.like === "true";
+    row.children[3].querySelector("input").checked = item.dislike === "true";
   });
 
   updateAll();
 }
 
-// auto load + save
+// chạy khi mở web
 loadData();
+
+// tự lưu
 document.addEventListener("change", saveData);
 document.addEventListener("input", saveData);
 </script>
+
+</body>
+</html>
